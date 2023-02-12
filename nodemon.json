@@ -2,7 +2,7 @@
     "verbose": true,
     "exec": "node --inspect=127.0.0.1:9229 --require ts-node/register ./src/index.ts",
     "watch": [
-      "./src/index.ts"
+      "./src/*"
     ],
     "ignore": [
       "node_modules/"
