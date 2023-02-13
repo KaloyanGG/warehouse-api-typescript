@@ -1,10 +1,14 @@
-import express, { Request, Response } from 'express';
+import express, { NextFunction, Request, Response } from 'express';
 import mongoose from "mongoose";
-import logger from './logger/logger';
+import logger from './utils/logger';
 import dotenv from 'dotenv';
 import connectToMongoDB from './db/connect';
-import UserModel from './model/user.model';
-import userRegisterSchema from './schema/user-register.schema';
+import UserModel from './models/user.model';
+import userRegisterSchema from './schemas/user-register.schema';
+import { z } from 'zod'
+import { validateSchema } from './middlewares/schema-validator';
+import { registerRoutes } from './routes/routes';
+
 
 dotenv.config();
 const app = express();
@@ -12,9 +16,7 @@ const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-app.get('/', (req: Request, res: Response) => {
-    res.send('Hello World!');
-});
+registerRoutes(app);
 
 app.listen(process.env.port, async () => {
     await connectToMongoDB();
@@ -22,17 +24,7 @@ app.listen(process.env.port, async () => {
 
 });
 
-app.post('/api/auth/register', async (req: Request, res: Response) => {
-    try {
-        // const validationResult = await userRegisterSchema.validateAsync(req.body);
-        // res.send(validationResult);
-        const user = await UserModel.create(req.body);
-        res.status(201).json(user);
-    } catch (error: any) {
-        res.status(400).send(error);
-        // logger.error(error);
-    }
-});
+
 
 
 
