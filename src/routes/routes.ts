@@ -1,24 +1,15 @@
 import dotenv from 'dotenv';
-import { Express, Request, Response } from "express";
-import { validateSchema } from "../middlewares/schema-validator";
-import UserModel from "../models/user.model";
-import userRegisterSchema from "../schemas/user-register.schema";
-import bcrypt from 'bcrypt';
+import { Express, request, Request, Response } from "express";
+import { validateSchema } from "../middleware/schema-validator";
+import userRegisterSchema from "../schema/user-register.schema";
+import userLoginSchema from '../schema/user-login.schema';
+import { loginHandler, registerHandler } from '../controller/auth.controller';
+
 dotenv.config();
-
-
 export function registerRoutes(app: Express) {
     app.get('/', (req: Request, res: Response) => {
         res.send('Hello World!');
     });
-
-    app.post('/api/auth/register', validateSchema(userRegisterSchema), async (req: Request, res: Response) => {
-        try {
-            const encrypted = await bcrypt.hash(req.body.password, Number(process.env.saltWorkFactor));
-            const user = await UserModel.create({ username: req.body.username, password: encrypted });
-            res.status(201).json({ user });
-        } catch (error: any) {
-            res.status(400).send({ error });
-        }
-    });
+    app.post('/auth/login', validateSchema(userLoginSchema), loginHandler);
+    app.post('/auth/register', validateSchema(userRegisterSchema), registerHandler);
 }
