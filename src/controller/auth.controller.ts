@@ -1,8 +1,14 @@
-import jwt from 'jsonwebtoken';
-import { Request, Response } from "express";
+import { NextFunction, Request, Response } from "express";
 import UserModel from "../model/user.model";
 import bcrypt from 'bcrypt';
 import { signToken, validatePassword } from '../service/auth.service';
+import jwt from 'jsonwebtoken';
+import logger from '../utils/logger';
+import dotenv from 'dotenv';
+
+
+
+dotenv.config();
 
 async function loginHandler(req: Request, res: Response) {
     const user = await validatePassword(req.body);
@@ -27,4 +33,20 @@ async function registerHandler(req: Request, res: Response) {
     }
 }
 
-export { loginHandler, registerHandler };
+function authenticateUser(req: Request, res: Response, next: NextFunction) {
+
+    const accessToken = req.headers['authorization'];
+
+    if (!accessToken) {
+        return res.sendStatus(401);
+    }
+
+    try {
+        const ver = jwt.verify(accessToken, process.env.privateKey as string);
+        next();
+    } catch (error: any) {
+        return res.status(401).send(error);
+    }
+}
+
+export { loginHandler, registerHandler, authenticateUser };

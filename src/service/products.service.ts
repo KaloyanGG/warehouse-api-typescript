@@ -2,6 +2,7 @@ import { ObjectId } from "mongoose";
 import ProductModel from "../model/product.model";
 
 
+
 async function deleteAllProducts() {
     await ProductModel.deleteMany({});
 }
