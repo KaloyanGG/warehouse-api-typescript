@@ -2,18 +2,15 @@ import jwt from 'jsonwebtoken';
 import { Request, Response } from "express";
 import UserModel from "../model/user.model";
 import bcrypt from 'bcrypt';
-
+import { signToken, validatePassword } from '../service/auth.service';
 
 async function loginHandler(req: Request, res: Response) {
-    const user = await UserModel.findOne({ username: req.body.username });
-    const secret = process.env.privateKey as string;
+    const user = await validatePassword(req.body);
     const accessExpiresIn = process.env.accessTokenTtl;
     const refreshExpiresIn = process.env.refreshTokenTtl;
-    let accessToken = null;
-    let refreshToken = null;
     if (user) {
-        const accessToken = jwt.sign({ username: user.username }, secret, { expiresIn: accessExpiresIn });
-        const refreshToken = jwt.sign({ username: user.username }, secret, { expiresIn: refreshExpiresIn });
+        const accessToken = signToken({ username: user.username }, { expiresIn: accessExpiresIn });
+        const refreshToken = signToken({ username: user.username }, { expiresIn: refreshExpiresIn });
         res.status(200).json({ accessToken, refreshToken });
     } else {
         res.sendStatus(401);

@@ -7,7 +7,7 @@ export function validateSchema(schema: z.ZodEffects<any> | z.ZodObject<any>) {
             const validationResult = await schema.parseAsync(req.body);
             next();
         } catch (error: any) {
-            res.status(400).send({ error });
+            res.status(400).send(error);
         }
     }
 }

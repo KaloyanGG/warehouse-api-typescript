@@ -1,5 +1,4 @@
 import { z } from 'zod';
-import userRegisterSchema from './user-register.schema';
 
 const userLoginSchema = z.object({
     username: z.string().regex(/^[a-zA-Z_]{5,50}$/),
