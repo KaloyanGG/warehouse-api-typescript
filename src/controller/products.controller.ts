@@ -2,9 +2,23 @@ import { Request, Response } from "express";
 import ProductModel from "../model/product.model";
 import { deleteAllProducts, deleteProductById } from "../service/products.service";
 import logger from "../utils/logger";
+import paginationQueryParamsSchema from "../schema/pagination.schema";
 
 async function getAllProductsHandler(req: Request, res: Response) {
-    res.send(await ProductModel.find({}));
+
+    if (Object.keys(req.query).length !== 0) {
+        try {
+            const page = Number(req.query.page);
+            const limit = Number(req.query.limit);
+            await paginationQueryParamsSchema.parseAsync({ ...req.query, page, limit });
+            res.send(await ProductModel.find({}).limit(limit).skip((page - 1) * limit).lean());
+        } catch (err) {
+            res.status(400).send(err);
+        }
+    } else {
+        res.send(await ProductModel.find({}).lean());
+    }
+
 }
 
 async function deleteHandler(req: Request, res: Response) {
@@ -20,6 +34,7 @@ async function deleteHandler(req: Request, res: Response) {
             return res.status(200).send({ message: 'All products deleted' });
         }
     } catch (error) {
+        logger.error(error);
         res.status(400).send({ error });
     }
 }
@@ -40,4 +55,15 @@ async function updateHandler(req: Request, res: Response) {
     }
 }
 
-export { getAllProductsHandler, deleteHandler, updateHandler }
+
+async function addProductHandler(req: Request, res: Response) {
+    try {
+        const product = await ProductModel.create(req.body);
+        res.status(201).json({ product });
+    } catch (error) {
+        logger.error(error);
+        res.status(400).send({ error });
+    }
+}
+
+export { addProductHandler, getAllProductsHandler, deleteHandler, updateHandler }

@@ -1,6 +1,6 @@
+import { Request, Response } from "express";
 import { ObjectId } from "mongoose";
 import ProductModel from "../model/product.model";
-
 
 
 async function deleteAllProducts() {
