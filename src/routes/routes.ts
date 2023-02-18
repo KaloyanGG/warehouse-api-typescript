@@ -17,7 +17,6 @@ export function registerRoutes(app: Express) {
     });
 
     app.get('/products', authenticateUser, getAllProductsHandler);
-    // app.get('/products', getAllProductsHandler);
 
     app.post('/auth/login', validateSchema(userLoginSchema), loginHandler);
     app.post('/auth/register', validateSchema(userRegisterSchema), registerHandler);

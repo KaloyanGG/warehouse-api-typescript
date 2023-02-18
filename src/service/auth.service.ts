@@ -1,6 +1,10 @@
 import jwt from 'jsonwebtoken';
 import UserModel from '../model/user.model';
 import bcrypt from 'bcrypt';
+import { Request } from 'express';
+import dotenv from 'dotenv';
+
+dotenv.config();
 
 function signToken(payload: any, options: jwt.SignOptions | undefined) {
     const secret = process.env.privateKey as string;
@@ -17,4 +21,33 @@ async function validatePassword({ username, password }: { username: string, pass
     return null;
 }
 
-export { signToken, validatePassword };
+function hasBothTokens(req: Request): false | { accessToken: string, refreshToken: string } {
+    const accessToken = req.headers['authorization'];
+    const refreshToken = req.headers['x-refresh'] as string;
+    if (accessToken && refreshToken) {
+        return { accessToken, refreshToken };
+    }
+    return false;
+}
+function verifyAccessAndRefreshTokens({ accessToken, refreshToken }: { accessToken: string, refreshToken: string }) {
+    try {
+        jwt.verify(accessToken, process.env.privateKey as string);
+        jwt.verify(refreshToken, process.env.privateKey as string);
+        return true;
+    } catch (error: any) {
+        return false;
+    }
+}
+
+function signAccessAndRefreshTokens(user: { username: string, password: string } | null) {
+    if (!user) return null;
+    try {
+        const accessToken = signToken({ username: user.username }, { expiresIn: process.env.accessTokenTtl });
+        const refreshToken = signToken({ username: user.username }, { expiresIn: process.env.refreshTokenTtl });
+        return { accessToken, refreshToken };
+    } catch (err: any) {
+        return null;
+    }
+}
+
+export { signToken, validatePassword, hasBothTokens, verifyAccessAndRefreshTokens, signAccessAndRefreshTokens };
