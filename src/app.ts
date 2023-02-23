@@ -5,9 +5,12 @@ import dotenv from 'dotenv';
 import connectToMongoDB from './db/connect';
 import { registerRoutes } from './routes/routes';
 import ProductModel from './model/product.model';
+import cors from 'cors';
 
 dotenv.config();
 const app = express();
+
+app.use(cors());
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));

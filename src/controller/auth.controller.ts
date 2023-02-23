@@ -12,10 +12,37 @@ async function loginHandler(req: Request, res: Response) {
     const user = await validatePassword(req.body);
     const tokens = signAccessAndRefreshTokens(user);
     if (user && tokens) {
-        res.status(200).json(tokens);
+        // res.status(200).json(tokens);
+        res.status(200);
+        // res.cookie('accessToken', tokens.accessToken, { sameSite: "none", secure: true, maxAge: transformJwtTimeToSeconds(process.env.accessTokenTtl as string) });
+        // res.cookie('refreshToken', tokens.refreshToken, { sameSite: "none", secure: true, maxAge: transformJwtTimeToSeconds(process.env.refreshTokenTtl as string) });
+        res.json({ accessToken: tokens.accessToken, refreshToken: tokens.refreshToken });
     } else {
         res.sendStatus(401);
     }
+}
+function transformJwtTimeToSeconds(jwtTime: string): number {
+    const time = jwtTime.match(/\d+/g);
+    if (!time) return 0;
+    const unit = jwtTime.match(/[a-zA-Z]+/g);
+    if (!unit) return 0;
+    const seconds = time.reduce((acc, curr, index) => {
+        switch (unit[index]) {
+            case 's':
+                return acc + Number(curr);
+            case 'm':
+                return acc + Number(curr) * 60;
+            case 'h':
+                return acc + Number(curr) * 60 * 60;
+            case 'd':
+                return acc + Number(curr) * 60 * 60 * 24;
+            case 'w':
+                return acc + Number(curr) * 60 * 60 * 24 * 7;
+            default:
+                return acc;
+        }
+    }, 0);
+    return seconds * 1000;
 }
 
 async function registerHandler(req: Request, res: Response) {
