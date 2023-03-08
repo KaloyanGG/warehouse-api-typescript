@@ -5,7 +5,7 @@ import logger from "../utils/logger";
 export function validateSchema(schema: z.ZodEffects<any> | z.ZodObject<any>) {
     return async (req: Request, res: Response, next: NextFunction) => {
         try {
-            const validationResult = await schema.parseAsync(req.body);
+            await schema.parseAsync(req.body);
             next();
         } catch (error: any) {
             logger.error(error);

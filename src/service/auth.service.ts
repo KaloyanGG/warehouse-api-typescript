@@ -1,4 +1,4 @@
-import jwt from 'jsonwebtoken';
+import jwt, { verify } from 'jsonwebtoken';
 import UserModel from '../model/user.model';
 import bcrypt from 'bcrypt';
 import { Request } from 'express';
@@ -7,7 +7,7 @@ import dotenv from 'dotenv';
 dotenv.config();
 
 function signToken(payload: any, options: jwt.SignOptions | undefined) {
-    const secret = process.env.privateKey as string;
+    const secret = process.env.privateKey!;
     return jwt.sign(payload, secret, options);
 }
 async function validatePassword({ username, password }: { username: string, password: string }) {
@@ -29,10 +29,21 @@ function hasBothTokens(req: Request): false | { accessToken: string, refreshToke
     }
     return false;
 }
+function hasBothCookies(req: Request): false | { accessToken: string, refreshToken: string } {
+
+    const accessToken = req.cookies['accessToken'];
+    const refreshToken = req.cookies['refreshToken'];
+    if (accessToken && refreshToken) {
+        return { accessToken, refreshToken };
+    }
+    return false;
+
+}
 function verifyAccessAndRefreshTokens({ accessToken, refreshToken }: { accessToken: string, refreshToken: string }) {
     try {
-        jwt.verify(accessToken, process.env.privateKey as string);
-        jwt.verify(refreshToken, process.env.privateKey as string);
+        //jwt.verify
+        verify(accessToken, process.env.privateKey!);
+        verify(refreshToken, process.env.privateKey!);
         return true;
     } catch (error: any) {
         return false;
@@ -50,4 +61,4 @@ function signAccessAndRefreshTokens(user: { username: string, password: string }
     }
 }
 
-export { signToken, validatePassword, hasBothTokens, verifyAccessAndRefreshTokens, signAccessAndRefreshTokens };
+export { hasBothCookies, signToken, validatePassword, hasBothTokens, verifyAccessAndRefreshTokens, signAccessAndRefreshTokens };

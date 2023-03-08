@@ -24,9 +24,11 @@ async function getAllProductsHandler(req: Request, res: Response) {
 async function deleteHandler(req: Request, res: Response) {
     try {
         if (req.query.id) {
+            logger.info(req.cookies);
             const product = await deleteProductById(req.query.id as string);
+
             if (product) {
-                res.status(200).send({ message: 'Product deleted' });
+                return res.status(200).send({ message: 'Product deleted' });
             }
             res.status(404).send({ message: 'Product not found' });
         } else {
@@ -66,4 +68,16 @@ async function addProductHandler(req: Request, res: Response) {
     }
 }
 
-export { addProductHandler, getAllProductsHandler, deleteHandler, updateHandler }
+async function getProductByIdHandler(req: Request, res: Response) {
+    try {
+        const product = await ProductModel.findById(req.params.id);
+        if (!product) return res.status(404).json({ error: 'Product not found' });
+        res.status(200).json(product);
+    } catch (error) {
+        logger.error(error);
+        res.sendStatus(404);
+        // res.status(500).send({ error });
+    }
+}
+
+export { addProductHandler, getAllProductsHandler, deleteHandler, updateHandler, getProductByIdHandler }

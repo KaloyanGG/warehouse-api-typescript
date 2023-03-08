@@ -1,7 +1,8 @@
 import { z } from 'zod';
 
 const productUpdateSchema = z.object({
-    name: z.string().max(50).optional(),
+    _id: z.string(),
+    name: z.string().min(1).max(50).optional(),
     description: z.string().max(2000).optional(),
     photo: z.string().optional(),
     buyPrice: z.number().positive().optional(),
