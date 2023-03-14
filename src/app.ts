@@ -7,6 +7,8 @@ import { registerRoutes } from './routes/routes';
 import ProductModel from './model/product.model';
 import cors from 'cors';
 import cookieParser from 'cookie-parser';
+import fileUpload from 'express-fileupload';
+import bodyParser from 'body-parser';
 
 dotenv.config();
 const app = express();
@@ -16,6 +18,12 @@ app.use(cors({
     credentials: true,
     origin: 'http://localhost:3001' // from where the requests are coming
 }));
+
+
+app.use(bodyParser.json({ limit: '10mb' }));
+
+// app.use(fileUpload());
+
 
 app.use(cookieParser());
 app.use(express.json());

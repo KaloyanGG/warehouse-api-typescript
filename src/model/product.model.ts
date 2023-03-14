@@ -23,7 +23,7 @@ class Product {
     public description?: string;
 
     @prop()
-    public photo?: string;
+    public photoPath?: string;
 
     @prop({ required: true, min: 0.01 })
     public buyPrice!: number;

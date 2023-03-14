@@ -3,6 +3,10 @@ import ProductModel from "../model/product.model";
 import { deleteAllProducts, deleteProductById } from "../service/products.service";
 import logger from "../utils/logger";
 import paginationQueryParamsSchema from "../schema/pagination.schema";
+import { UploadedFile } from "express-fileupload";
+import { saveFileFromBase64 } from "../utils/saveFileFromBase63";
+import dotenv from 'dotenv';
+dotenv.config();
 
 async function getAllProductsHandler(req: Request, res: Response) {
 
@@ -24,7 +28,6 @@ async function getAllProductsHandler(req: Request, res: Response) {
 async function deleteHandler(req: Request, res: Response) {
     try {
         if (req.query.id) {
-            logger.info(req.cookies);
             const product = await deleteProductById(req.query.id as string);
 
             if (product) {
@@ -60,8 +63,17 @@ async function updateHandler(req: Request, res: Response) {
 
 async function addProductHandler(req: Request, res: Response) {
     try {
-        const product = await ProductModel.create(req.body);
+        const product = await ProductModel.create({
+            ...req.body,
+            photoPath: req.body.photo
+                ? process.env.photosPath + req.body.name + '.png'
+                : process.env.photosPath + 'no-photo-available.png'
+        });
+        if (req.body.photo) {
+            saveFileFromBase64(req.body.photo, req.body.name + '.png');
+        }
         res.status(201).json({ product });
+        // res.sendStatus(200);
     } catch (error) {
         logger.error(error);
         res.status(400).send({ error });
