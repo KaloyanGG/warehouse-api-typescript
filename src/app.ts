@@ -55,6 +55,7 @@ async function addTenProducts(req: Request, res: Response) {
             name: `product ${i}`,
             buyPrice: 10 * i,
             sellPrice: 11 * i,
+            photoPath: `${process.env.photosPath}\kitty.png`,
             type: 'Хранителни стоки',
             count: 25 * i,
             description: 'Описание на продукт ' + i + ' A warehouse product could be a pallet of electronics components that are being stored in a temperature-controlled environment until they are ready to be assembled into finished products.',

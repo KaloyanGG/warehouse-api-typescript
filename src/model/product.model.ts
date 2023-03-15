@@ -22,8 +22,8 @@ class Product {
     @prop({ maxlength: 2000 })
     public description?: string;
 
-    @prop()
-    public photoPath?: string;
+    @prop({ required: true })
+    public photoPath!: string;
 
     @prop({ required: true, min: 0.01 })
     public buyPrice!: number;
