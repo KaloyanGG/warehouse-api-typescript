@@ -39,8 +39,8 @@ async function getAllProductsHandler(req: Request, res: Response) {
 
 async function deleteHandler(req: Request, res: Response) {
     try {
-        if (req.query.id) {
-            const product = await deleteProductById(req.query.id as string);
+        if (req.params.id) {
+            const product = await deleteProductById(req.params.id as string);
 
             if (product) {
                 return res.status(200).send({ message: 'Product deleted' });

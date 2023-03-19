@@ -29,12 +29,18 @@ app.use(cookieParser());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-registerRoutes(app);
+try {
+    registerRoutes(app);
+    app.listen(process.env.port, async () => {
+        await connectToMongoDB();
+        logger.info(`Listening on port ${process.env.port}`); //3000
+    });
 
-app.listen(process.env.port, async () => {
-    await connectToMongoDB();
-    logger.info(`Listening on port ${process.env.port}`); //3000
-});
+} catch (err) {
+    logger.error(err);
+    throw err;
+}
+
 
 // todo hash the private key
 // todo cors
@@ -43,32 +49,6 @@ app.listen(process.env.port, async () => {
 // tests
 
 
-app.post('/addProducts', addSomeProducts);
-async function addSomeProducts(req: Request, res: Response) {
-    await addTenProducts(req, res);
-}
-
-async function addTenProducts(req: Request, res: Response) {
-    const products = [];
-    for (let i = 1; i <= 10; i++) {
-        products.push({
-            name: `product ${i}`,
-            buyPrice: 10 * i,
-            sellPrice: 11 * i,
-            photoPath: `${process.env.photosPath}\kitty.png`,
-            type: 'Хранителни стоки',
-            count: 25 * i,
-            description: 'Описание на продукт ' + i + ' A warehouse product could be a pallet of electronics components that are being stored in a temperature-controlled environment until they are ready to be assembled into finished products.',
-
-        });
-    }
-    try {
-        await ProductModel.insertMany(products);
-        res.status(200).send({ message: 'Products added' });
-    } catch (err) {
-        res.send(err);
-    }
-}
 
 
 

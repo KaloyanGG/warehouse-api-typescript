@@ -18,5 +18,8 @@
         "titleBar.inactiveBackground": "#a3b24e99",
         "titleBar.inactiveForeground": "#15202b99"
     },
-    "peacock.color": "#a3b24e"
+    "peacock.color": "#a3b24e",
+    "cSpell.words": [
+        "sendgrid"
+    ]
 }

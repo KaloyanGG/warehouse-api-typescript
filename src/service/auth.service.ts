@@ -1,8 +1,9 @@
 import jwt, { verify } from 'jsonwebtoken';
 import UserModel from '../model/user.model';
 import bcrypt from 'bcrypt';
-import { Request } from 'express';
+import { Request, Response } from 'express';
 import dotenv from 'dotenv';
+import transformJwtTimeToSeconds from '../utils/jwtToString';
 
 dotenv.config();
 
@@ -20,15 +21,25 @@ async function validatePassword({ username, password }: { username: string, pass
     }
     return null;
 }
-
 function hasBothTokens(req: Request): false | { accessToken: string, refreshToken: string } {
-    const accessToken = req.headers['authorization'];
-    const refreshToken = req.headers['x-refresh'] as string;
+    const accessToken = req.cookies['accessToken'];
+    const refreshToken = req.cookies['refreshToken'];
     if (accessToken && refreshToken) {
         return { accessToken, refreshToken };
     }
     return false;
 }
+
+//? function hasBothTokensHeaderVariant(req: Request): false | { accessToken: string, refreshToken: string } {
+//     const accessToken = req.headers['authorization'];
+//     const refreshToken = req.headers['x-refresh'] as string;
+//     if (accessToken && refreshToken) {
+//         return { accessToken, refreshToken };
+//     }
+//     return false;
+// }
+
+
 function hasBothCookies(req: Request): false | { accessToken: string, refreshToken: string } {
 
     const accessToken = req.cookies['accessToken'];
@@ -41,7 +52,6 @@ function hasBothCookies(req: Request): false | { accessToken: string, refreshTok
 }
 function verifyAccessAndRefreshTokens({ accessToken, refreshToken }: { accessToken: string, refreshToken: string }) {
     try {
-        //jwt.verify
         verify(accessToken, process.env.privateKey!);
         verify(refreshToken, process.env.privateKey!);
         return true;
@@ -61,4 +71,9 @@ function signAccessAndRefreshTokens(user: { username: string, password: string }
     }
 }
 
-export { hasBothCookies, signToken, validatePassword, hasBothTokens, verifyAccessAndRefreshTokens, signAccessAndRefreshTokens };
+function setBothCookies(res: Response, tokens: { accessToken: string, refreshToken: string }) {
+    res.cookie('accessToken', tokens.accessToken, { httpOnly: true, maxAge: transformJwtTimeToSeconds(process.env.accessTokenTtl!) });
+    res.cookie('refreshToken', tokens.refreshToken, { httpOnly: true, maxAge: transformJwtTimeToSeconds(process.env.refreshTokenTtl!) });
+}
+
+export { setBothCookies, hasBothCookies, signToken, validatePassword, hasBothTokens, verifyAccessAndRefreshTokens, signAccessAndRefreshTokens };
